@@ -4,7 +4,7 @@ from mangum import Mangum
 
 app = FastAPI(
     description="Simple FastAPI server that runs on top of Lambda Functions.",
-    contact="Santiago Garcia Arango <san99tiago@gmail.com>",
+    contact={"Santiago Garcia Arango": "santiago.garcia1999@hotmail.com"},
     title="Simple FastAPI Example",
     version="0.0.1",
 )

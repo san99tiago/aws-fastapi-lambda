@@ -34,7 +34,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poe.tasks]
-local-fastapi = "uvicorn src.lambdas.api.main:app"
+local-fastapi = "uvicorn src.lambdas.api.main:app --reload"
 test-unit = "coverage run -m pytest tests/unit"
 test-unit-lambdas = "coverage run -m pytest tests/unit/lambdas"
 test-unit-cdk = "coverage run -m pytest tests/unit/cdk"
