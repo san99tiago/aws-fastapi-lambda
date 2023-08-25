@@ -35,10 +35,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poe.tasks]
 local-fastapi = "uvicorn src.lambdas.api.main:app --reload"
-test-unit = "coverage run -m pytest tests/unit"
-test-unit-lambdas = "coverage run -m pytest tests/unit/lambdas"
-test-unit-cdk = "coverage run -m pytest tests/unit/cdk"
-test-unit-html = "coverage html"
+test-unit = ["_make","_test_unit", "_coverage_html"]
+test-unit-lambdas = ["_test_unit_lambdas", "_coverage_html"]
+test-unit-cdk = ["_make","_test_unit_cdk", "_coverage_html"]
+_make = "make all"
+_test_unit = "coverage run -m pytest tests/unit"
+_test_unit_lambdas = "coverage run -m pytest tests/unit/lambdas"
+_test_unit_cdk = "coverage run -m pytest tests/unit/cdk"
+_coverage_html = "coverage html"
 
 [tool.coverage.run]
 branch = true
