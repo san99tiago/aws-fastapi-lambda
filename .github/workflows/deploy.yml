@@ -21,16 +21,20 @@ jobs:
       - run: echo "Job running on a ${{ runner.os }} server hosted by GitHub."
       - run: echo "Branch name is ${{ github.ref }} and repository is ${{ github.repository }}."
 
-      - name: Install poetry
-        run: pipx install poetry
-
       - uses: actions/setup-python@v4
         with:
           python-version: 3.11
           cache: poetry
 
-      - name: Install Python dependencies
-        run: poetry install
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Install Poetry dependencies
+        run: poetry install --no-interaction
 
       - name: Set up NodeJs
         uses: actions/setup-node@v3
@@ -63,7 +67,7 @@ jobs:
 
       - name: Synth CDK to CloudFormation Template
         run: |
-          poetry shell
+          source .venv/bin/activate
           pip list
           cdk synth
 
