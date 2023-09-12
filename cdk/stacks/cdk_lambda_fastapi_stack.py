@@ -98,7 +98,7 @@ class LambdaFunctionFastAPIStack(Stack):
         )
 
         self.lambda_function_url = self.lambda_fastapi.add_function_url(
-            auth_type=aws_lambda.FunctionUrlAuthType.NONE,
+            auth_type=aws_lambda.FunctionUrlAuthType.AWS_IAM,
         )
 
     def generate_cloudformation_outputs(self):

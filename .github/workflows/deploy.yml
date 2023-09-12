@@ -70,5 +70,6 @@ jobs:
           pip list
           cdk synth
 
-      # - name: Deploy to AWS
-      #   run: cdk deploy --require-approval=never
+      # NOTE: for now no manual approvals are required
+      - name: Deploy to AWS
+        run: cdk deploy --require-approval=never
