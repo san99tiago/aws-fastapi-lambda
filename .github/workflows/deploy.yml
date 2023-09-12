@@ -37,6 +37,11 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Install CDK
+        run: |
+          npm install -g aws-cdk
+
+      # # MY OLD AUTH CONFIG (NOW WITH GITHUB OIDC TOKEN)
       # - name: Configure AWS credentials
       #   uses: aws-actions/configure-aws-credentials@master
       #   with:
