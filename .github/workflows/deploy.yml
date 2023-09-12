@@ -61,11 +61,11 @@ jobs:
         run: |
           aws sts get-caller-identity
 
-      - name: Synth CloudFormation Template
+      - name: Synth CDK to CloudFormation Template
         run: |
-          cdk --version
-          python --version
-          which python
+          pip list
+          poetry shell
+          pip list
           cdk synth
 
       # - name: Deploy to AWS
