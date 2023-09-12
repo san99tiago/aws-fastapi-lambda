@@ -63,7 +63,6 @@ jobs:
 
       - name: Synth CDK to CloudFormation Template
         run: |
-          pip list
           poetry shell
           pip list
           cdk synth
