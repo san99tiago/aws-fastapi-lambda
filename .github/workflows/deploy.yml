@@ -67,9 +67,10 @@ jobs:
       - name: Synth CDK to CloudFormation Template
         run: |
           source .venv/bin/activate
-          pip list
           cdk synth
 
       # NOTE: for now no manual approvals are required
       - name: Deploy to AWS
-        run: cdk deploy --require-approval=never
+        run: |
+          source .venv/bin/activate
+          cdk deploy --require-approval=never
