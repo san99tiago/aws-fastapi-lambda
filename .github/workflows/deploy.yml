@@ -1,0 +1,58 @@
+name: deploy
+
+on:
+  push:
+    branches: [ 'main', 'feature/**']
+    tags: [ 'v*']
+env:
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_DEFAULT_OUTPUT: json
+
+jobs:
+  deploy-cdk:
+    name: Deploy CDK
+    runs-on: ubuntu-latest
+    # These permissions are needed to interact with GitHub’s OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - run: echo "Job triggered by ${{ github.event_name }} event."
+      - run: echo "Job running on a ${{ runner.os }} server hosted by GitHub."
+      - run: echo "Branch name is ${{ github.ref }} and repository is ${{ github.repository }}."
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+          cache: poetry
+
+      - name: Install Python dependencies
+        run: poetry install
+
+      - name: Set up NodeJs
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@master
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+      #     aws-region: "us-east-1"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ env.AWS_DEPLOY_ROLE }}
+          role-session-name: myGitHubActions
+
+      - name: Synth CloudFormation Template
+        run: cdk synth
+
+      # - name: Deploy to AWS
+      #   run: cdk deploy --require-approval=never
