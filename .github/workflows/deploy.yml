@@ -62,7 +62,11 @@ jobs:
           aws sts get-caller-identity
 
       - name: Synth CloudFormation Template
-        run: cdk synth
+        run: |
+          cdk --version
+          python --version
+          which python
+          cdk synth
 
       # - name: Deploy to AWS
       #   run: cdk deploy --require-approval=never
