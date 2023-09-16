@@ -108,6 +108,14 @@ jobs:
           name: cdk-synth-folder
           path: ./cdk-synth-output-folder
 
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: ./cdk-synth-output-folder
+
+      - name: Tree Debug
+        run: |
+          tree .
+
       - name: Run Checkov action
         id: checkov
         uses: bridgecrewio/checkov-action@v12
