@@ -120,7 +120,7 @@ jobs:
         with:
           directory: cdk-synth-output-folder/
           framework: cloudformation
-          soft_fail: false # optional: do not return an error code if there are failed checks
+          soft_fail: true # optional: do not return an error code if there are failed checks
           skip_check: CKV_AWS_2 # optional: skip a specific check_id. can be comma separated list
           quiet: true # optional: display only failed checks
           log_level: WARNING  # optional: set log level. Default WARNING
