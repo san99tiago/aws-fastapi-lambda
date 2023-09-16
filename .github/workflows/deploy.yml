@@ -92,7 +92,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: cdk-synth-folder
-          path: !
+          path: |
             ./cdk.out
             !./cdk.out/asset.*
           retention-days: 1
