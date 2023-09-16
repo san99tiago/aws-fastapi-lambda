@@ -93,6 +93,7 @@ jobs:
         with:
           name: cdk-synth-folder
           path: ./cdk.out
+          retention-days: 1
 
   iac-checkov:
     name: IaC Checkov Validations
@@ -105,13 +106,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: cdk-synth-folder
-          path: ./cdk.out
+          path: ./cdk-synth-output-folder
 
       - name: Run Checkov action
         id: checkov
         uses: bridgecrewio/checkov-action@v12
         with:
-          directory: .cdk.out/
+          directory: cdk-synth-output-folder/.cdk.out/
           framework: cloudformation
           soft_fail: true # optional: do not return an error code if there are failed checks
           skip_check: CKV_AWS_2 # optional: skip a specific check_id. can be comma separated list
