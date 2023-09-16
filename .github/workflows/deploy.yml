@@ -9,18 +9,36 @@ env:
   AWS_DEFAULT_OUTPUT: json
 
 jobs:
-  deploy-cdk:
-    name: Deploy CDK
+  code-quality:
+    name: Check coding standards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: echo "Job triggered by ${{ github.event_name }} event."
+      - run: echo "Job running on a ${{ runner.os }} server hosted by GitHub."
+      - run: echo "Branch name is ${{ github.ref }} and repository is ${{ github.repository }}."
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+      - name: Install Poetry dependencies
+        run: poetry install --no-interaction
+      - name: Check code formatting
+        run: poetry run poe black-check
+
+  cdk-synth:
+    name: CDK Synth
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
     steps:
       - uses: actions/checkout@v3
-      - run: echo "Job triggered by ${{ github.event_name }} event."
-      - run: echo "Job running on a ${{ runner.os }} server hosted by GitHub."
-      - run: echo "Branch name is ${{ github.ref }} and repository is ${{ github.repository }}."
-
       - uses: actions/setup-python@v4
         with:
           python-version: 3.11
@@ -68,6 +86,87 @@ jobs:
         run: |
           source .venv/bin/activate
           cdk synth
+
+      - name: Archive CDK Synth results
+        uses: actions/upload-artifact@v3
+        with:
+          name: cdk-synth-folder
+          path: ./cdk.out
+
+  iac-checkov:
+    name: IaC Checkov Validations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Dowload CDK Synth results
+        uses: actions/download-artifact@v3
+        with:
+          name: cdk-synth-folder
+          path: ./cdk.out
+
+      - name: Run Checkov action
+        id: checkov
+        uses: bridgecrewio/checkov-action@12
+        with:
+          directory: .cdk.out/
+          framework: cloudformation
+          soft_fail: true # optional: do not return an error code if there are failed checks
+          skip_check: CKV_AWS_2 # optional: skip a specific check_id. can be comma separated list
+          quiet: true # optional: display only failed checks
+          log_level: WARNING  # optional: set log level. Default WARNING
+
+  cdk-deploy:
+    name: Deploy CDK
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      id-token: write  # This is required for requesting the JWT
+      contents: read  # This is required for actions/checkout
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Install Poetry dependencies
+        run: poetry install --no-interaction
+
+      - name: Set up NodeJs
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install CDK
+        run: |
+          npm install -g aws-cdk
+
+      # # MY OLD AUTH CONFIG (NOW WITH GITHUB OIDC TOKEN)
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@master
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+      #     aws-region: "us-east-1"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
+          role-session-name: myGitHubActions
+
+      # Sample STS get caller identity for tests
+      - name: sts get-caller-identity
+        run: |
+          aws sts get-caller-identity
 
       # NOTE: for now no manual approvals are required
       - name: Deploy to AWS
