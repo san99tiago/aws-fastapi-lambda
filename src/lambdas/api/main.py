@@ -12,7 +12,7 @@ app = FastAPI(
     description="Simple FastAPI server that runs on top of Lambda Functions.",
     contact={"Santiago Garcia Arango": "san99tiago@gmail.com"},
     title="Simple FastAPI Example",
-    version="0.0.1",
+    version="1.0.0",
 )
 
 

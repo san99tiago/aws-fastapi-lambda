@@ -115,6 +115,6 @@ class LambdaFunctionFastAPIStack(Stack):
         CfnOutput(
             self,
             "LambdaFunctionDocsUrl",
-            value=self.lambda_function_url.url,
+            value=f"{self.lambda_function_url.url}docs",
             description="Documentation URL to invoke Lambda Function",
         )
