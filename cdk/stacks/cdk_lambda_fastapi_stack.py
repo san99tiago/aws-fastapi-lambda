@@ -57,6 +57,7 @@ class LambdaFunctionFastAPIStack(Stack):
                 aws_lambda.Runtime.PYTHON_3_12,
             ],
             description="Lambda Layer for Python with <fastapi> library",
+            compatible_architectures=[aws_lambda.Architecture.X86_64],
             removal_policy=RemovalPolicy.DESTROY,
         )
 
