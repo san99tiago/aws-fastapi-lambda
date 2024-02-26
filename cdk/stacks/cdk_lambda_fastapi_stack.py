@@ -47,21 +47,14 @@ class LambdaFunctionFastAPIStack(Stack):
         dependencies of the Lambda Functions.
         """
 
-        # Layer for "LambdaPowerTools" (for logging, traces, observability, etc)
-        self.lambda_layer_powertools = aws_lambda.LayerVersion.from_layer_version_arn(
-            self,
-            id="LambdaLayer-Powertools",
-            layer_version_arn=f"arn:aws:lambda:{self.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:35",
-        )
-
         # Layer for "FastAPI" and "Mangum" Adapter libraries
         self.lambda_layer_fastapi = aws_lambda.LayerVersion(
             self,
             id="LambdaLayer-FastAPI",
             code=aws_lambda.Code.from_asset("lambda-layers/fastapi/modules"),
             compatible_runtimes=[
-                aws_lambda.Runtime.PYTHON_3_9,
-                aws_lambda.Runtime.PYTHON_3_10,
+                aws_lambda.Runtime.PYTHON_3_11,
+                aws_lambda.Runtime.PYTHON_3_12,
             ],
             description="Lambda Layer for Python with <fastapi> library",
             removal_policy=RemovalPolicy.DESTROY,
@@ -81,24 +74,23 @@ class LambdaFunctionFastAPIStack(Stack):
         self.lambda_fastapi: aws_lambda.Function = aws_lambda.Function(
             self,
             id="Lambda-FastAPI",
-            runtime=aws_lambda.Runtime.PYTHON_3_9,
+            runtime=aws_lambda.Runtime.PYTHON_3_12,
             handler="api/main.handler",
             code=aws_lambda.Code.from_asset(PATH_TO_LAMBDA_FUNCTION_FOLDER),
-            timeout=Duration.seconds(30),
+            timeout=Duration.seconds(20),
             memory_size=128,
             environment={
                 "ENVIRONMENT": self.deployment_environment,
                 "LOG_LEVEL": "DEBUG",
-                "STATE_MACHINE_ENABLED": "true",
             },
             layers=[
-                self.lambda_layer_powertools,
                 self.lambda_layer_fastapi,
             ],
         )
 
+        # NOTE: If IAM-based based auth needed, update the "auth_type" to "AWS_IAM"
         self.lambda_function_url = self.lambda_fastapi.add_function_url(
-            auth_type=aws_lambda.FunctionUrlAuthType.AWS_IAM,
+            auth_type=aws_lambda.FunctionUrlAuthType.NONE
         )
 
     def generate_cloudformation_outputs(self):
@@ -115,7 +107,14 @@ class LambdaFunctionFastAPIStack(Stack):
 
         CfnOutput(
             self,
-            "LambdaFunctionUrl",
+            "LambdaFunctionRootUrl",
             value=self.lambda_function_url.url,
-            description="URL to invoke Lambda Function",
+            description="Root URL to invoke Lambda Function",
+        )
+
+        CfnOutput(
+            self,
+            "LambdaFunctionDocsUrl",
+            value=self.lambda_function_url.url,
+            description="Documentation URL to invoke Lambda Function",
         )
