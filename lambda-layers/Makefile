@@ -1,4 +1,4 @@
-all:
+install:
 	cd fastapi && $(MAKE)
 
 clean:
