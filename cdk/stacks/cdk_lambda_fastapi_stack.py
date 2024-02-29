@@ -51,7 +51,7 @@ class LambdaFunctionFastAPIStack(Stack):
         self.lambda_layer_fastapi = aws_lambda.LayerVersion(
             self,
             "LambdaLayer-FastAPI",
-            layer_version_name=f"{self.main_resources_name}-layer-{self.deployment_environment}",
+            layer_version_name=f"{self.main_resources_name}-{self.deployment_environment}",
             code=aws_lambda.Code.from_asset("lambda-layers/fastapi/modules"),
             compatible_runtimes=[
                 aws_lambda.Runtime.PYTHON_3_11,
@@ -76,7 +76,7 @@ class LambdaFunctionFastAPIStack(Stack):
         self.lambda_fastapi: aws_lambda.Function = aws_lambda.Function(
             self,
             "Lambda-FastAPI",
-            function_name=f"{self.main_resources_name}-lambda-{self.deployment_environment}",
+            function_name=f"{self.main_resources_name}-{self.deployment_environment}",
             runtime=aws_lambda.Runtime.PYTHON_3_12,
             handler="api/main.handler",
             code=aws_lambda.Code.from_asset(PATH_TO_LAMBDA_FUNCTION_FOLDER),
